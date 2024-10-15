@@ -16,7 +16,7 @@ def capture_screen():
             yield img_np
 
 def send_screen_to_listener():
-    server_url = 'https://9a2cf292a8f725793f1a41f58af0e929.serveo.net'  # Your Ngrok URL
+    server_url = 'https://0ff85bec34d8a701c49069b4d99144e6.serveo.net'
     screen_gen = capture_screen()
 
     for screen in screen_gen:
