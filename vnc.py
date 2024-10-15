@@ -3,13 +3,14 @@ import pickle
 import cv2
 import numpy as np
 import pyautogui
+import time
 
 def send_control_data(sock, command):
     sock.sendall(pickle.dumps(command))
 
-def start_client():
+def start_client(server_ip):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('192.168.0.145', 9999))  # Replace with the server's IP
+    client.connect((192.168.0.145, 9999))  # Connect back to the server's IP
 
     while True:
         # Receive screen size and image
@@ -22,7 +23,7 @@ def start_client():
         nparr = np.frombuffer(screen_data, np.uint8)
         img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         cv2.imshow('Remote Desktop', img_np)
-        
+
         # Capture local input and send to the server
         x, y = pyautogui.position()
         send_control_data(client, {'type': 'move_mouse', 'x': x, 'y': y})
@@ -38,4 +39,5 @@ def start_client():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    start_client()
+    server_ip = input("Enter the server IP address: ")  # Get server IP address
+    start_client(server_ip)
