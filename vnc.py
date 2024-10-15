@@ -3,14 +3,21 @@ import pickle
 import cv2
 import numpy as np
 import pyautogui
-import time
 
 def send_control_data(sock, command):
     sock.sendall(pickle.dumps(command))
 
-def start_client(server_ip):
+def start_client():
+    server_ip = '192.168.0.145'  # Hard-coded server IP address
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((192.168.0.145, 9999))  # Connect back to the server's IP
+    
+    # Attempt to connect to the server
+    try:
+        client.connect((server_ip, 9999))  # Connect back to the server's IP
+        print(f"Connected to server at {server_ip}")
+    except Exception as e:
+        print(f"Failed to connect to server at {server_ip}: {e}")
+        return
 
     while True:
         # Receive screen size and image
@@ -33,11 +40,11 @@ def start_client(server_ip):
         if key != -1:
             send_control_data(client, {'type': 'keypress', 'key': chr(key)})
 
+        # Break the loop if the window is closed
         if cv2.getWindowProperty('Remote Desktop', cv2.WND_PROP_VISIBLE) < 1:
             break
 
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    server_ip = input("Enter the server IP address: ")  # Get server IP address
-    start_client(server_ip)
+    start_client()
