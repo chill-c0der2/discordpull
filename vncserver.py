@@ -7,7 +7,7 @@ import pyautogui
 
 def start_client():
     server_ip = '8.tcp.ngrok.io'  # Your Ngrok address
-    server_port = 12345  # Your Ngrok port
+    server_port = 10305  # Your Ngrok port
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     client.connect((server_ip, server_port))
@@ -18,30 +18,36 @@ def start_client():
         data = b""
         while len(data) < struct.calcsize("L"):
             packet = client.recv(4096)
-            if not packet: break
+            if not packet:
+                print("No packet received, exiting...")
+                return  # Exit if no more packets are received
             data += packet
         msg_size = struct.unpack("L", data[:struct.calcsize("L")])[0]
         data = data[struct.calcsize("L"):]
 
         while len(data) < msg_size:
             packet = client.recv(4096)
-            if not packet: break
+            if not packet:
+                print("No more data received, exiting...")
+                return  # Exit if no more packets are received
             data += packet
 
         # Decode the image
-        frame = pickle.loads(data)
-        
-        # Display the image
-        cv2.imshow("Remote Desktop", frame)
+        try:
+            frame = pickle.loads(data)
+            # Display the image
+            cv2.imshow("Remote Desktop", frame)
 
-        # Handle mouse control
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+            # Handle mouse control
+            x, y = pyautogui.position()
+            command = f"move,{x},{y}"
+            client.send(command.encode('utf-8'))
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        except Exception as e:
+            print(f"Error decoding frame: {e}")
             break
-
-        # Send mouse position to the server
-        x, y = pyautogui.position()
-        command = "move,{0},{1}".format(x, y)
-        client.send(command.encode('utf-8'))
 
     client.close()
     cv2.destroyAllWindows()
