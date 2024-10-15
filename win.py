@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import requests
 import time
+import cv2  # Make sure to import cv2
 
 # Function to capture the screen
 def capture_screen():
